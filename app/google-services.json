@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "388968818372",
+    "project_id": "beyzasker-housemateapp",
+    "storage_bucket": "beyzasker-housemateapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388968818372:android:5206a5f13c949762c44b91",
+        "android_client_info": {
+          "package_name": "com.beyzasker.housemateapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "388968818372-4umc5ejejscikcc10vffdc6nn964359u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu1u5h-Lj5t15-eav96KtaRmYvpvdUsQw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "388968818372-4umc5ejejscikcc10vffdc6nn964359u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
