@@ -1,1 +1,1 @@
-# GradStudentApp
+# HouseMateApp
