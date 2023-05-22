@@ -46,17 +46,18 @@ class OtherProfileActivity : AppCompatActivity() {
                 educationTextView.text = userDetails.education
                 yearTextView.text = "${userDetails.entryYear}-${userDetails.gradYear}"
                 stateTextView.text = userDetails.state
-                distanceTextView.text = userDetails.distance
+                distanceTextView.text = userDetails.distance.toString()
                 timeTextView.text = userDetails.time
                 emailTextView.text = userDetails.email
                 numberTextView.text = userDetails.number
-                photoImageView.setImageBitmap(convertBase64ToImage(userDetails.photo))
+                if (userDetails.photo.isNotEmpty()) {
+                    photoImageView.setImageBitmap(convertBase64ToImage(userDetails.photo))
+                }
             }
         }.addOnFailureListener {
             // Hata durumunda yapılacak işlemler
         }
     }
-
 
     private fun convertBase64ToImage(photoString: String): Bitmap {
         val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)

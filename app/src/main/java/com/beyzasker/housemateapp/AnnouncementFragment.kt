@@ -125,6 +125,12 @@ class AnnouncementFragment : Fragment() {
     private fun convertToUserModel(snapshot: QuerySnapshot): UserModel {
         val userDetails = snapshot.documents[0]
 
+        val distanceValue = userDetails["distance"]
+        val distance: Double = if (distanceValue is Double) {
+            distanceValue
+        } else {
+            0.0
+        }
         return UserModel(
             userDetails["uid"].toString(),
             userDetails["fullName"].toString(),
@@ -135,8 +141,8 @@ class AnnouncementFragment : Fragment() {
             userDetails["photo"].toString(),
             userDetails["education"].toString(),
             userDetails["state"].toString(),
+            distance,
             userDetails["time"].toString(),
-            userDetails["distance"].toString(),
             userDetails["nameArr"] as List<String>,
             userDetails["isAdmin"] as Boolean
         )

@@ -161,10 +161,10 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:inputType="numberDecimal"
-                        android:digits="0123456789.km"
                         android:textColor="#2196F3"
                         android:textSize="15dp"
                         android:textStyle="bold" />
+
 
                 </LinearLayout>
 

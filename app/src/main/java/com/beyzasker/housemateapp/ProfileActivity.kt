@@ -1,8 +1,12 @@
 package com.beyzasker.housemateapp
 
-import android.content.Intent
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.text.Editable
 import android.util.Base64
@@ -14,6 +18,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.beyzasker.housemateapp.model.UserModel
 import com.google.firebase.auth.FirebaseAuth
@@ -30,6 +36,12 @@ class ProfileActivity : AppCompatActivity() {
     private var buttonClickCount = 0
     private lateinit var userDocID: String
     private val editableFactory: Editable.Factory = Editable.Factory.getInstance()
+
+    private lateinit var locationManager: LocationManager
+    private lateinit var locationListener: LocationListener
+    private lateinit var targetLocation: Location // Target location coordinates
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +81,9 @@ class ProfileActivity : AppCompatActivity() {
                 yearTextView.text =
                     editableFactory.newEditable(userDetails.entryYear + "-" + userDetails.gradYear)
                 stateTextView.text = editableFactory.newEditable(userDetails.state)
-                distanceTextView.text = editableFactory.newEditable(userDetails.distance)
+                val distanceString = userDetails.distance.toString()
+                distanceTextView.text = editableFactory.newEditable(distanceString)
+
                 timeTextView.text = editableFactory.newEditable(userDetails.time)
                 emailTextView.text = editableFactory.newEditable(userDetails.email)
                 numberTextView.text = editableFactory.newEditable(userDetails.number)
@@ -89,7 +103,7 @@ class ProfileActivity : AppCompatActivity() {
                 educationTextView.isEnabled = false
                 yearTextView.isEnabled = false
                 stateTextView.isEnabled = false
-                distanceTextView.isEnabled = false
+                distanceTextView.isEnabled = false // Kullanıcının distance bilgisini düzenlemesini engeller
                 timeTextView.isEnabled = false
                 emailTextView.isEnabled = false
                 numberTextView.isEnabled = false
@@ -109,7 +123,7 @@ class ProfileActivity : AppCompatActivity() {
                     userDetails.photo,
                     educationTextView.text.toString(),
                     stateTextView.text.toString(),
-                    distanceTextView.text.toString(),
+                    distanceTextView.text.toString().toDoubleOrNull() ?: 0.0,
                     timeTextView.text.toString(),
                     userDetails.nameArr,
                     userDetails.isAdmin
@@ -132,7 +146,7 @@ class ProfileActivity : AppCompatActivity() {
                 educationTextView.isEnabled = true
                 yearTextView.isEnabled = true
                 stateTextView.isEnabled = true
-                distanceTextView.isEnabled = true
+                distanceTextView.isEnabled = false // Distance bilgisini güncellenmesini engeller
                 timeTextView.isEnabled = true
                 emailTextView.isEnabled = true
                 numberTextView.isEnabled = true
@@ -153,10 +167,94 @@ class ProfileActivity : AppCompatActivity() {
             val alertDialog = dialogBuilder.create()
             alertDialog.show()
         }
+
+        // Konum bilgilerini almak için izinleri kontrol etme
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            startLocationUpdates()
+        }
+
+        // Hedef konumu tanımlama
+        val targetLocation = Location("")
+        targetLocation.latitude = 41.0298 // YTÜ Davutpaşa Kampüsü'nün enlemi
+        targetLocation.longitude = 28.9324 // YTÜ Davutpaşa Kampüsü'nün boylamı
+
     }
 
     private fun convertBase64ToImage(photoString: String): Bitmap {
         val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
     }
+
+    private fun startLocationUpdates() {
+        // Konum güncellemelerini dinlemek için uygun parametreleri kullanarak requestLocationUpdates yöntemini çağırın
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                val distance = location.distanceTo(targetLocation) / 1000.0 // Distance in kilometers
+
+                val distanceTextView = findViewById<EditText>(R.id.ProfileActivityDistance)
+                distanceTextView.text = editableFactory.newEditable(distance.toString())
+
+
+                val updatedDistanceString = distance.toString()
+
+                val userDB = db.collection("Users")
+                userDB.document(userDocID)
+                    .update("distance", updatedDistanceString)
+                    .addOnSuccessListener {
+                        // Başarılı güncelleme durumunda yapılacak işlemler
+                    }
+                    .addOnFailureListener {
+                        // Hata durumunda yapılacak işlemler
+                    }
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+            override fun onProviderEnabled(provider: String) {
+                // Konum sağlayıcısı etkinleştirildiğinde buraya gelecektir.
+                // Gerekli işlemleri burada yapabilirsiniz.
+            }
+
+            override fun onProviderDisabled(provider: String) {
+                // Kullanıcı konum iznini devre dışı bıraktığında buraya gelecektir.
+                // Gerekli işlemleri burada yapabilirsiniz.
+            }
+        }
+
+        // Konum iznini kontrol etme
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                MIN_TIME_BETWEEN_UPDATES,
+                MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                locationListener
+            )
+        } else {
+            // Konum izni yoksa, izin isteği yapılabilir veya alternatif bir işlem yapılabilir.
+            // Örneğin, kullanıcıya bir açıklama gösterip, izin isteği için bir yönlendirme yapabilirsiniz.
+            // Bu kısımda uygun işlemleri gerçekleştirebilirsiniz.
+        }
+    }
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+        private const val MIN_TIME_BETWEEN_UPDATES: Long = 1000
+        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES = 10f
+
+    }
 }
+

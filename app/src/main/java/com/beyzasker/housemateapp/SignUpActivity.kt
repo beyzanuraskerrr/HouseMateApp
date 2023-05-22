@@ -88,7 +88,7 @@ class SignUpActivity : AppCompatActivity() {
                     "",
                     "",
                     "",
-                    "",
+                    0.0,
                     "",
                     arrayListOf(),
                     false
