@@ -1,6 +1,6 @@
 package com.beyzasker.housemateapp
 
-import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.beyzasker.housemateapp.model.UserModel
@@ -93,60 +94,49 @@ class ProfileActivity : AppCompatActivity() {
                 emailTextView.isEnabled = false
                 numberTextView.isEnabled = false
 
-                if (passwordEditText.text.isNotEmpty()) {
-                    user?.updatePassword(passwordEditText.text.toString())
-                        ?.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(
-                                    this@ProfileActivity,
-                                    "Password was updated",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                Toast.makeText(
-                                    this@ProfileActivity,
-                                    "Update password failed!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }?.addOnFailureListener {
-                            Toast.makeText(
-                                this@ProfileActivity,
-                                "Update password failed!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                if (passwordEditText.isVisible) {
+                    passwordEditText.isVisible = false
+                    passwordTextView.isVisible = false
                 }
 
-                passwordEditText.isVisible = false
-                passwordEditText.text.clear()
-                passwordTextView.isVisible = false
+                val updatedUserDetails = UserModel(
+                    userDetails.uid,
+                    fullNameTextView.text.toString(),
+                    emailTextView.text.toString(),
+                    userDetails.entryYear,
+                    userDetails.gradYear,
+                    numberTextView.text.toString(),
+                    userDetails.photo,
+                    educationTextView.text.toString(),
+                    stateTextView.text.toString(),
+                    distanceTextView.text.toString(),
+                    timeTextView.text.toString(),
+                    userDetails.nameArr,
+                    userDetails.isAdmin
+                )
 
-                userDB.document(userDocID).update(
-                    "fullName", fullNameTextView.text.toString(),
-                    "education", educationTextView.text.toString(),
-                    "entryYear", yearTextView.text.trim().substring(0, yearTextView.text.indexOf("-")),
-                    "gradYear", yearTextView.text.trim().substring(yearTextView.text.indexOf("-") + 1),
-                    "state", stateTextView.text.toString(),
-                    "time", timeTextView.text.toString(),
-                    "distance", distanceTextView.text.toString(),
-                    "email", emailTextView.text.toString(),
-                    "number", numberTextView.text.toString()
-                ).addOnSuccessListener {
-                    Toast.makeText(this@ProfileActivity, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                }.addOnFailureListener { e ->
-                    Toast.makeText(this@ProfileActivity, "Profile update failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                userDB.document(userDocID).set(updatedUserDetails).addOnSuccessListener {
+                    Toast.makeText(
+                        this,
+                        "Profile Updated Successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }.addOnFailureListener {
+                    // Hata durumunda yapılacak işlemler
                 }
+
             } else {
                 editButton.text = "save"
+
                 fullNameTextView.isEnabled = true
                 educationTextView.isEnabled = true
                 yearTextView.isEnabled = true
                 stateTextView.isEnabled = true
-                timeTextView.isEnabled = true
                 distanceTextView.isEnabled = true
+                timeTextView.isEnabled = true
                 emailTextView.isEnabled = true
                 numberTextView.isEnabled = true
+
                 passwordEditText.isVisible = true
                 passwordTextView.isVisible = true
             }
@@ -160,29 +150,13 @@ class ProfileActivity : AppCompatActivity() {
             val dialogPhotoImageView = dialogView.findViewById<ImageView>(R.id.dialogPhotoImageView)
             dialogPhotoImageView.setImageBitmap(convertBase64ToImage(userDetails.photo))
 
-            val dialog = dialogBuilder.create()
-            dialog.show()
-        }
-
-        val userModel = intent.getParcelableExtra<UserModel>("userModel")
-        if (userModel != null) {
-            userDetails = userModel
-
-            fullNameTextView.text = editableFactory.newEditable(userDetails.fullName)
-            educationTextView.text = editableFactory.newEditable(userDetails.education)
-            yearTextView.text =
-                editableFactory.newEditable(userDetails.entryYear + "-" + userDetails.gradYear)
-            stateTextView.text = editableFactory.newEditable(userDetails.state)
-            distanceTextView.text = editableFactory.newEditable(userDetails.distance)
-            timeTextView.text = editableFactory.newEditable(userDetails.time)
-            emailTextView.text = editableFactory.newEditable(userDetails.email)
-            numberTextView.text = editableFactory.newEditable(userDetails.number)
-            photoImageView.setImageBitmap(convertBase64ToImage(userDetails.photo))
+            val alertDialog = dialogBuilder.create()
+            alertDialog.show()
         }
     }
 
-    private fun convertBase64ToImage(base64String: String): Bitmap? {
-        val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+    private fun convertBase64ToImage(photoString: String): Bitmap {
+        val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
     }
 }

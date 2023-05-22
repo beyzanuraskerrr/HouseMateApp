@@ -3,7 +3,6 @@ package com.beyzasker.housemateapp.model
 import android.os.Parcel
 import android.os.Parcelable
 
-
 data class UserModel(
     var uid: String,
     var fullName: String,
@@ -17,7 +16,7 @@ data class UserModel(
     var distance: String,
     var time: String,
     var nameArr: List<String>,
-    var isAdmin: Boolean
+    var isAdmin: Boolean = false
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -35,9 +34,11 @@ data class UserModel(
         parcel.createStringArrayList() ?: listOf(),
         parcel.readByte() != 0.toByte()
     )
+
     constructor() : this(
         "", "", "", "", "", "", "", "", "", "", "", emptyList(), false
     )
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(uid)
         parcel.writeString(fullName)

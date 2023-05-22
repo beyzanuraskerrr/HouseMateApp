@@ -1,37 +1,36 @@
 package com.beyzasker.housemateapp
-
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.beyzasker.housemateapp.model.UserModel
 
-
-
 class ProfileAdapter(
     private val userList: ArrayList<UserModel>,
-    private val onItemClickListener: (UserModel) -> Unit
+    private val onProfileItemClickListener: OnProfileItemClickListener
 ) : RecyclerView.Adapter<ProfileAdapter.ProfileViewHolder>() {
+
+    interface OnProfileItemClickListener {
+        fun onItemClick(userModel: UserModel)
+    }
 
     inner class ProfileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val profileImageView: ImageView = itemView.findViewById(R.id.profileImageView)
         private val fullNameTextView: TextView = itemView.findViewById(R.id.fullNameTextView)
         private val emailTextView: TextView = itemView.findViewById(R.id.emailTextView)
         private val educationTextView: TextView = itemView.findViewById(R.id.educationTextView)
-        private val detailButton: Button = itemView.findViewById(R.id.detailButton)
 
         init {
-            detailButton.setOnClickListener {
-                val userModel = userList[adapterPosition]
-                val intent = Intent(itemView.context, ProfileActivity::class.java)
-                intent.putExtra("userModel", userModel)
-                itemView.context.startActivity(intent)
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val clickedUser = userList[position]
+                    onProfileItemClickListener.onItemClick(clickedUser)
+                }
             }
         }
 
@@ -40,12 +39,9 @@ class ProfileAdapter(
             emailTextView.text = userModel.email
             educationTextView.text = userModel.education
 
-            // Fotoğrafı Base64'den Bitmap'e dönüştür
             val decodedBytes = Base64.decode(userModel.photo, Base64.DEFAULT)
             val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
             profileImageView.setImageBitmap(decodedBitmap)
-
-                onItemClickListener(userModel)
         }
     }
 

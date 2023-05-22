@@ -42,6 +42,14 @@
                 android:value="" />
         </activity>
         <activity
+            android:name=".OtherProfileActivity"
+            android:label="Other Profile Activity" >
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>

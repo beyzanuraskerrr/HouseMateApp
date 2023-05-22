@@ -7,34 +7,27 @@
     <ImageView
         android:id="@+id/profileImageView"
         android:layout_width="80dp"
-        android:layout_height="80dp" />
-
+        android:layout_height="80dp"
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/fullNameTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/emailTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp" />
+        android:layout_marginTop="4dp" />
 
     <TextView
         android:id="@+id/educationTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp" />
-
-    <!-- Diğer bilgileri buraya ekleyebilirsiniz -->
-    <Button
-        android:id="@+id/detailButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Detayları Görüntüle"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>
