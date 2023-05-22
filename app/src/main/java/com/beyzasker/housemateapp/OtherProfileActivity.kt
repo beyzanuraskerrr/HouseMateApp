@@ -4,10 +4,15 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.beyzasker.housemateapp.model.UserModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -56,6 +61,43 @@ class OtherProfileActivity : AppCompatActivity() {
             }
         }.addOnFailureListener {
             // Hata durumunda yapılacak işlemler
+        }
+
+
+        // Eşleşme butonunu tanımlayın ve tıklama olayını dinleyin
+        val matchButton = findViewById<Button>(R.id.matchButton)
+        matchButton.setOnClickListener {
+            // Eşleşme talebi gönderilecek hedef kullanıcının UID'si
+            val targetUserUid = "Hedef_Kullanıcı_UID"
+
+            // Eşleşme talebini temsil eden bir belge oluşturun
+            val matchRequestData = hashMapOf(
+                "senderUid" to FirebaseAuth.getInstance().currentUser?.uid, // Talebi gönderen kullanıcının UID'si
+                "timestamp" to FieldValue.serverTimestamp() // Talebin gönderildiği zaman
+            )
+
+            // Eşleşme talebini Firestore veritabanına ekleyin
+            db.collection("MatchRequests")
+                .document(targetUserUid)
+                .set(matchRequestData)
+                .addOnSuccessListener {
+                    // Talep başarıyla gönderildiğinde yapılacak işlemler
+                    Toast.makeText(this, "Eşleşme talebi gönderildi.", Toast.LENGTH_SHORT).show()
+
+                    // Eşleşme talebi gönderildiğinde kullanıcıya bildirim gösterme işlemleri
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle("Eşleşme Talebi")
+                        .setMessage("Bir eşleşme talebi aldınız!")
+                        .setPositiveButton("Tamam") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                    val dialog = builder.create()
+                    dialog.show()
+                }
+                .addOnFailureListener { e ->
+                    // Talep gönderme hatası durumunda yapılacak işlemler
+                    Toast.makeText(this, "Eşleşme talebi gönderme hatası: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
