@@ -1,4 +1,6 @@
 package com.beyzasker.housemateapp
+
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.view.LayoutInflater
@@ -16,6 +18,7 @@ class ProfileAdapter(
 
     interface OnProfileItemClickListener {
         fun onItemClick(userModel: UserModel)
+        fun onMatchButtonClick(userModel: UserModel)
     }
 
     inner class ProfileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -24,26 +27,26 @@ class ProfileAdapter(
         private val emailTextView: TextView = itemView.findViewById(R.id.emailTextView)
         private val educationTextView: TextView = itemView.findViewById(R.id.educationTextView)
 
-        init {
-            itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val clickedUser = userList[position]
-                    onProfileItemClickListener.onItemClick(clickedUser)
-                }
-            }
-        }
-
         fun bind(userModel: UserModel) {
             fullNameTextView.text = userModel.fullName
             emailTextView.text = userModel.email
             educationTextView.text = userModel.education
 
-            val decodedBytes = Base64.decode(userModel.photo, Base64.DEFAULT)
-            val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-            profileImageView.setImageBitmap(decodedBitmap)
+            if (userModel.photo.isNotEmpty()) {
+                val decodedBytes = Base64.decode(userModel.photo, Base64.DEFAULT)
+                val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                profileImageView.setImageBitmap(decodedBitmap)
+            }
+
+            itemView.setOnClickListener {
+                val intent = Intent(itemView.context, OtherProfileActivity::class.java)
+                intent.putExtra("userID", userModel.uid)
+                intent.putExtra("fullName", userModel.fullName)
+                itemView.context.startActivity(intent)
+            }
         }
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder {
         val view = LayoutInflater.from(parent.context)

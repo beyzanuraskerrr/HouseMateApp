@@ -141,7 +141,7 @@ class AnnouncementFragment : Fragment() {
             userDetails["photo"].toString(),
             userDetails["education"].toString(),
             userDetails["state"].toString(),
-            distance,
+            userDetails["distance"].toString(),
             userDetails["time"].toString(),
             userDetails["nameArr"] as List<String>,
             userDetails["isAdmin"] as Boolean

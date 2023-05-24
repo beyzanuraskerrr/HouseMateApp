@@ -76,7 +76,7 @@ class AddAnnouncementActivity : AppCompatActivity() {
             userDetails.getString("photo")!!,
             userDetails.getString("education")!!,
             userDetails.getString("state")!!,
-            userDetails.getDouble("distance")!!,
+            userDetails.getString("distance")!!,
             userDetails.getString("time")!!,
             userDetails.get("nameArr") as List<String>,
             userDetails.getBoolean("isAdmin")!!

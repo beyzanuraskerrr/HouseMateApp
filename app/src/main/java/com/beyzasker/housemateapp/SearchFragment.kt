@@ -1,4 +1,5 @@
 package com.beyzasker.housemateapp
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -11,13 +12,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.beyzasker.housemateapp.model.UserModel
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class SearchFragment : Fragment(), ProfileAdapter.OnProfileItemClickListener {
     private lateinit var db: FirebaseFirestore
-    private lateinit var queryResult: ArrayList<UserModel> // Değişiklik burada
+    private lateinit var queryResult: ArrayList<UserModel>
     private lateinit var profileAdapter: ProfileAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchView: SearchView
@@ -29,7 +29,8 @@ class SearchFragment : Fragment(), ProfileAdapter.OnProfileItemClickListener {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
         db = Firebase.firestore
-        queryResult = ArrayList() // Değişiklik burada
+
+        queryResult = ArrayList()
         profileAdapter = ProfileAdapter(queryResult, this)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.adapter = profileAdapter
@@ -72,5 +73,12 @@ class SearchFragment : Fragment(), ProfileAdapter.OnProfileItemClickListener {
         val intent = Intent(requireContext(), OtherProfileActivity::class.java)
         intent.putExtra("userID", userModel.uid)
         startActivity(intent)
+    }
+
+    override fun onMatchButtonClick(userModel: UserModel) {
+        // Eşleşme talebi gönderme işlemini burada gerçekleştirebilirsiniz
+        // userModel, eşleşme talebi gönderilecek kullanıcının verilerini içerir
+        // userModel.uid, hedef kullanıcının UID'sini temsil eder
+        // Eşleşme talebi gönderme işlemlerini burada yapabilirsiniz
     }
 }

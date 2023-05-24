@@ -1,0 +1,11 @@
+<channels xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <channel
+        android:id="@+id/default_channel_id"
+        android:name="new match request"
+        android:description="@string/channel_description"
+
+        />
+
+
+</channels>

@@ -29,6 +29,7 @@ class OtherProfileActivity : AppCompatActivity() {
         db = Firebase.firestore
 
         val userID = intent?.getStringExtra("userID") ?: ""
+        val fullName = intent?.getStringExtra("fullName") ?: ""
 
         val fullNameTextView = findViewById<TextView>(R.id.OtherProfileActivityFullName)
         val educationTextView = findViewById<TextView>(R.id.OtherProfileActivityEducation)
@@ -59,32 +60,28 @@ class OtherProfileActivity : AppCompatActivity() {
                     photoImageView.setImageBitmap(convertBase64ToImage(userDetails.photo))
                 }
             }
-        }.addOnFailureListener {
-            // Hata durumunda yapılacak işlemler
+        }.addOnFailureListener { exception ->
+            Toast.makeText(this, "Profil detayları getirilirken bir hata oluştu: ${exception.message}", Toast.LENGTH_SHORT).show()
         }
 
-
-        // Eşleşme butonunu tanımlayın ve tıklama olayını dinleyin
         val matchButton = findViewById<Button>(R.id.matchButton)
         matchButton.setOnClickListener {
-            // Eşleşme talebi gönderilecek hedef kullanıcının UID'si
-            val targetUserUid = "Hedef_Kullanıcı_UID"
+            val targetUserUid = intent?.getStringExtra("userID") ?: ""
 
-            // Eşleşme talebini temsil eden bir belge oluşturun
             val matchRequestData = hashMapOf(
-                "senderUid" to FirebaseAuth.getInstance().currentUser?.uid, // Talebi gönderen kullanıcının UID'si
-                "timestamp" to FieldValue.serverTimestamp() // Talebin gönderildiği zaman
+                "senderUid" to FirebaseAuth.getInstance().currentUser?.uid,
+                "timestamp" to FieldValue.serverTimestamp()
             )
 
-            // Eşleşme talebini Firestore veritabanına ekleyin
             db.collection("MatchRequests")
                 .document(targetUserUid)
                 .set(matchRequestData)
                 .addOnSuccessListener {
-                    // Talep başarıyla gönderildiğinde yapılacak işlemler
                     Toast.makeText(this, "Eşleşme talebi gönderildi.", Toast.LENGTH_SHORT).show()
 
-                    // Eşleşme talebi gönderildiğinde kullanıcıya bildirim gösterme işlemleri
+                    // Bildirimi karşı tarafa gönderme işlemini yapın
+                    sendNotificationToOtherUser()
+
                     val builder = AlertDialog.Builder(this)
                     builder.setTitle("Eşleşme Talebi")
                         .setMessage("Bir eşleşme talebi aldınız!")
@@ -95,7 +92,6 @@ class OtherProfileActivity : AppCompatActivity() {
                     dialog.show()
                 }
                 .addOnFailureListener { e ->
-                    // Talep gönderme hatası durumunda yapılacak işlemler
                     Toast.makeText(this, "Eşleşme talebi gönderme hatası: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
@@ -104,5 +100,11 @@ class OtherProfileActivity : AppCompatActivity() {
     private fun convertBase64ToImage(photoString: String): Bitmap {
         val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    }
+
+    private fun sendNotificationToOtherUser() {
+        // Burada FCM ile bildirimi karşı tarafa gönderme işlemlerini gerçekleştirmeniz gerekmektedir.
+        // Gerekli kodları uygulamanıza entegre etmelisiniz.
+        // Bu kısımda detaylı kod örneği vermek yerine, FCM entegrasyonunuzun nasıl yapıldığına bağlı olarak uygun yöntemi kullanmanızı öneririm.
     }
 }

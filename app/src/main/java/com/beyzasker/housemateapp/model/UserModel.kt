@@ -13,7 +13,7 @@ data class UserModel(
     var photo: String,
     var education: String,
     var state: String,
-    var distance: Double,
+    var distance: String,
     var time: String,
     var nameArr: List<String>,
     var isAdmin: Boolean = false
@@ -29,14 +29,14 @@ data class UserModel(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        parcel.readDouble(),  // Corrected here
+        parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.createStringArrayList() ?: listOf(),
         parcel.readByte() != 0.toByte()
     )
 
     constructor() : this(
-        "", "", "", "", "", "", "", "", "", 0.0, "", emptyList(), false
+        "", "", "", "", "", "", "", "", "", "", "", emptyList(), false
     )
 
 
@@ -50,7 +50,7 @@ data class UserModel(
         parcel.writeString(photo)
         parcel.writeString(education)
         parcel.writeString(state)
-        parcel.writeDouble(distance)  // Corrected here
+        parcel.writeString(distance)  // Corrected here
         parcel.writeString(time)
         parcel.writeStringList(nameArr)
         parcel.writeByte(if (isAdmin) 1 else 0)

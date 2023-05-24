@@ -24,7 +24,6 @@ import androidx.core.view.isVisible
 import com.beyzasker.housemateapp.model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -41,8 +40,20 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var locationManager: LocationManager
     private lateinit var locationListener: LocationListener
     private lateinit var targetLocation: Location // Target location coordinates
+    private lateinit var lastKnownLocation: Location // Last known user location
 
 
+    private lateinit var fullNameTextView: EditText
+    private lateinit var educationTextView: EditText
+    private lateinit var yearTextView: EditText
+    private lateinit var emailTextView: EditText
+    private lateinit var stateTextView: EditText
+    private lateinit var distanceTextView: EditText
+    private lateinit var timeTextView: EditText
+    private lateinit var numberTextView: EditText
+    private lateinit var photoImageView: ImageView
+    private lateinit var passwordEditText: EditText
+    private lateinit var passwordTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,17 +65,17 @@ class ProfileActivity : AppCompatActivity() {
         val user = auth.currentUser
         val userDB = db.collection("Users")
 
-        val fullNameTextView = findViewById<EditText>(R.id.ProfileActivityFullName)
-        val educationTextView = findViewById<EditText>(R.id.ProfileActivityEducation)
-        val yearTextView = findViewById<EditText>(R.id.ProfileActivityYear)
-        val emailTextView = findViewById<EditText>(R.id.ProfileActivityEmail)
-        val stateTextView = findViewById<EditText>(R.id.ProfileActivityState)
-        val distanceTextView = findViewById<EditText>(R.id.ProfileActivityDistance)
-        val timeTextView = findViewById<EditText>(R.id.ProfileActivityTime)
-        val numberTextView = findViewById<EditText>(R.id.ProfileActivityNumber)
-        val photoImageView = findViewById<ImageView>(R.id.ProfileActivityPhoto)
-        val passwordEditText = findViewById<EditText>(R.id.ProfileActivityPassword)
-        val passwordTextView = findViewById<TextView>(R.id.ProfileActivityPw)
+        fullNameTextView = findViewById(R.id.ProfileActivityFullName)
+        educationTextView = findViewById(R.id.ProfileActivityEducation)
+        yearTextView = findViewById(R.id.ProfileActivityYear)
+        emailTextView = findViewById(R.id.ProfileActivityEmail)
+        stateTextView = findViewById(R.id.ProfileActivityState)
+        distanceTextView = findViewById(R.id.ProfileActivityDistance)
+        timeTextView = findViewById(R.id.ProfileActivityTime)
+        numberTextView = findViewById(R.id.ProfileActivityNumber)
+        photoImageView = findViewById(R.id.ProfileActivityPhoto)
+        passwordEditText = findViewById(R.id.ProfileActivityPassword)
+        passwordTextView = findViewById(R.id.ProfileActivityPw)
 
         passwordEditText.isVisible = false
         passwordTextView.isVisible = false
@@ -124,7 +135,7 @@ class ProfileActivity : AppCompatActivity() {
                     userDetails.photo,
                     educationTextView.text.toString(),
                     stateTextView.text.toString(),
-                    distanceTextView.text.toString().toDoubleOrNull() ?: 0.0,
+                    distanceTextView.text.toString(),
                     timeTextView.text.toString(),
                     userDetails.nameArr,
                     userDetails.isAdmin
@@ -186,9 +197,9 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         // Hedef konumu tanımlama
-        val targetLocation = Location("")
-        targetLocation.latitude = 41.0298 // YTÜ Davutpaşa Kampüsü'nün enlemi
-        targetLocation.longitude = 28.9324 // YTÜ Davutpaşa Kampüsü'nün boylamı
+        targetLocation = Location("")
+        targetLocation.latitude = 41.0579 // YTÜ Davutpaşa Kampüsü'nün enlemi
+        targetLocation.longitude = 28.8893 // YTÜ Davutpaşa Kampüsü'nün boylamı
 
     }
 
@@ -202,13 +213,13 @@ class ProfileActivity : AppCompatActivity() {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
-                val distance = location.distanceTo(targetLocation) / 1000.0 // Distance in kilometers
+                lastKnownLocation = location // Update the last known location
 
-                val distanceTextView = findViewById<EditText>(R.id.ProfileActivityDistance)
-                distanceTextView.text = editableFactory.newEditable(distance.toString())
+                val distanceInMeters = location.distanceTo(targetLocation) // Mesafeyi metre cinsinden alın
 
+                val distanceInKilometers = distanceInMeters / 1000.0 // Mesafeyi kilometre cinsine dönüştürün
 
-                val updatedDistanceString = distance.toString()
+                val updatedDistanceString = distanceInKilometers.toString()
 
                 val userDB = db.collection("Users")
                 userDB.document(userDocID)
@@ -219,12 +230,38 @@ class ProfileActivity : AppCompatActivity() {
                     .addOnFailureListener {
                         // Hata durumunda yapılacak işlemler
                     }
+
+                runOnUiThread {
+                    distanceTextView.text = editableFactory.newEditable(updatedDistanceString)
+                }
             }
 
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
+        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
             override fun onProviderEnabled(provider: String) {
                 // Konum sağlayıcısı etkinleştirildiğinde buraya gelecektir.
                 // Gerekli işlemleri burada yapabilirsiniz.
+
+                // lastKnownLocation üzerinden mesafe hesaplama işlemlerini gerçekleştirin
+                if (::lastKnownLocation.isInitialized) {
+                    val distanceInMeters = lastKnownLocation.distanceTo(targetLocation)
+                    val distanceInKilometers = distanceInMeters / 1000.0
+                    val updatedDistanceString = distanceInKilometers.toString()
+
+                    val userDB = db.collection("Users")
+                    userDB.document(userDocID)
+                        .update("distance", updatedDistanceString)
+                        .addOnSuccessListener {
+                            // Başarılı güncelleme durumunda yapılacak işlemler
+                        }
+                        .addOnFailureListener {
+                            // Hata durumunda yapılacak işlemler
+                        }
+
+                    runOnUiThread {
+                        distanceTextView.text = editableFactory.newEditable(updatedDistanceString)
+                    }
+                }
             }
 
             override fun onProviderDisabled(provider: String) {
