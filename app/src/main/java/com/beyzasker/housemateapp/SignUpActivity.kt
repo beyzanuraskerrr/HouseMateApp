@@ -62,6 +62,15 @@ class SignUpActivity : AppCompatActivity() {
         // [START create_user_with_email]
 
         val email = findViewById<EditText>(R.id.editTextEmail).text.toString()
+        var emailSplitted = email.split("@")
+        if (!(emailSplitted.size == 2 && emailSplitted[1].trim().equals("std.yildiz.edu.tr"))) {
+            Toast.makeText(
+                baseContext,
+                "Only std.yildiz.edu.tr mails are allowed",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return;
+        }
         val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
         val entryYear = findViewById<EditText>(R.id.editTextEntryYear).text.toString()
         val gradYear = findViewById<EditText>(R.id.editTextGradYear).text.toString()
@@ -110,6 +119,27 @@ class SignUpActivity : AppCompatActivity() {
                 }
 
                 insertUserRecord(userModel)
+
+                user.sendEmailVerification().addOnCompleteListener(this) {
+                    if (it.isSuccessful) {
+
+                        Toast.makeText(
+                            baseContext,
+                            "Need to verify your email address",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+
+                        val signUpIntent = Intent(this@SignUpActivity, LoginActivity::class.java)
+                        startActivity(signUpIntent)
+                        finish()
+                    } else {
+                        Toast.makeText(
+                            baseContext,
+                            "Error while sending verification email!",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                }
 
                 val signUpIntent = Intent(this@SignUpActivity, LoginActivity::class.java)
                 startActivity(signUpIntent)

@@ -42,10 +42,12 @@ class OtherProfileActivity : AppCompatActivity() {
         val photoImageView = findViewById<ImageView>(R.id.OtherProfileActivityPhoto)
 
         val userDB = db.collection("Users")
-        val userDocRef = userDB.document(userID)
+        val userDocRef = userDB.whereEqualTo("uid", userID)
 
-        userDocRef.get().addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.exists()) {
+        userDocRef.get().addOnSuccessListener { querySnapshot ->
+            if (!querySnapshot.isEmpty) {
+                val documentSnapshot = querySnapshot.documents[0]
+
                 userDetails = documentSnapshot.toObject(UserModel::class.java)!!
 
                 fullNameTextView.text = userDetails.fullName
@@ -61,7 +63,11 @@ class OtherProfileActivity : AppCompatActivity() {
                 }
             }
         }.addOnFailureListener { exception ->
-            Toast.makeText(this, "Profil detayları getirilirken bir hata oluştu: ${exception.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Profil detayları getirilirken bir hata oluştu: ${exception.message}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         val matchButton = findViewById<Button>(R.id.matchButton)
@@ -92,7 +98,11 @@ class OtherProfileActivity : AppCompatActivity() {
                     dialog.show()
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(this, "Eşleşme talebi gönderme hatası: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Eşleşme talebi gönderme hatası: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
         }
     }

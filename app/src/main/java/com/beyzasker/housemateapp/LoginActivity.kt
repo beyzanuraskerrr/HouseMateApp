@@ -52,7 +52,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun checkLoggedInState(): Boolean {
         val user = auth.currentUser
-        return user != null
+        return user != null && user.isEmailVerified
     }
 
     private fun signIn(email: String, password: String) {
@@ -63,6 +63,10 @@ class LoginActivity : AppCompatActivity() {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithEmail:success")
                     val user = auth.currentUser
+                    if(!user!!.isEmailVerified) {
+                        auth.signOut()
+                        return@addOnCompleteListener
+                    }
                     val loginIntent = Intent(this@LoginActivity, HomePageActivity::class.java)
                     loginIntent.putExtra("userId", user!!.uid)
                     loginIntent.putExtra("displayName", user.displayName)
